@@ -1,0 +1,10 @@
+# my_vpc_cidr="10.10.0.0/16"
+# my_subnet_cidr="10.10.0.0/24"
+vpc_cidrs=[
+    {name="my-vpc-dev",cidr="10.10.0.0/16"}
+]
+
+subnet_cidrs=[
+    {name="my-vpc-subnet-dev",cidr="10.10.0.0/24"},
+    {name="default-vpc-subnet-dev",cidr="172.31.96.0/20"}
+]
