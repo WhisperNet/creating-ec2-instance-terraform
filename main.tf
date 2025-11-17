@@ -30,6 +30,10 @@ variable pubic_key_filepath{
     description = "File path of the public key"
     type = string
 }
+variable private_key_filepath {
+    description = "File path of the private key"
+    type = string
+}
 
 resource "aws_vpc" "nginx-app-vpc" {
     cidr_block = var.vpc_cidr_block
@@ -129,10 +133,36 @@ resource "aws_instance" "nginx-server" {
   vpc_security_group_ids = [aws_default_security_group.nginx-sg.id]
   key_name = aws_key_pair.deployer.key_name
   associate_public_ip_address = true
-  user_data= file("./start-up.sh")
-  user_data_replace_on_change = true
+#   user_data= file("./start-up.sh")
+#   user_data_replace_on_change = true
   tags = {
     Name = "${var.env_prefix}-nginx-server"
+  }
+  connection {
+    type = "ssh"
+    host = self.public_ip
+    user = "ec2-user"
+    private_key = file(var.private_key_filepath)
+  }
+  provisioner "file" {
+    source = "./start-up.sh"
+    destination = "/home/ec2-user/start-up-ec2.sh"
+  }
+  provisioner "remote-exec" {
+    inline = ["chmod +x /home/ec2-user/start-up-ec2.sh","/home/ec2-user/start-up-ec2.sh"]
+    # script = "./star-up.sh" # no need to use file tp copy
+  }
+#   provisioner "remote-exec" {
+#     script = "random-script.sh"
+#     connection {
+#     type = "ssh"
+#     host = self.public_ip
+#     user = "ec2-user"
+#     private_key = file(var.another_private_key_filepath)
+#   }
+#   }
+  provisioner "local-exec" {
+    command = "echo ${self.public_ip} > output.txt"
   }
 }
 output public-ip {
